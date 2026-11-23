@@ -1180,7 +1180,7 @@
           <label>Hoặc dán link nhạc (.mp3 / audio trực tiếp)</label>
           <input type="text" id="edMusicUrl" placeholder="https://.../mot-doi.mp3" />
         </div>
-        <div class="music-status-text" id="musicStatusText">Bài nhạc: 17 — "Một Đời" (Chưa có file mot-doi.mp3 — hãy tải file lên GitHub hoặc chọn tại đây)</div>
+        <div class="music-status-text" id="musicStatusText">Bài nhạc: Ta Là Của Nhau (Chưa có file mot-doi.mp3 — hãy tải file lên GitHub hoặc chọn tại đây)</div>
       </div>
 
       <div class="ed-row-2">
@@ -1327,7 +1327,7 @@
 
       <div class="cover-date">11.12.2026</div>
       <div class="tap-hint">Chạm vào con dấu sáp để mở thiệp</div>
-      <div class="song-badge-mini" id="coverSongLabel">Nhạc: Một Đời</div>
+      <div class="song-badge-mini" id="coverSongLabel">Nhạc: Ta Là Của Nhau</div>
     </section>
 
     <!-- MÀN 2: TOÀN BỘ THIỆP MỞ RA -->
@@ -1580,8 +1580,8 @@
   "brideAddr": "Số nhà 3, khu 4, tổ dân phố Đại Yên, Chương Mỹ, Hà Nội",
   "mapBride": "https://www.google.com/maps?q=20.8880585,105.7002334&entry=gps&shh=CAE&lucs=,94297699,94231188,100821559,47071704,94218641,100808654,100849091,100838877,121816461,100798797,100848087&g_ep=CAISEjI2LjQ2LjEuMDE2OTc2MTQxMBgAINeCAypqLDk0Mjk3Njk5LDk0MjMxMTg4LDEwMDgyMTU1OSw0NzA3MTcwNCw5NDIxODY0MSwxMDA4MDg2NTQsMTAwODQ5MDkxLDEwMDgzODg3NywxMjE4MTY0NjEsMTAwNzk4Nzk3LDEwMDg0ODA4N0ICVk4%3D&skid=aba8401c-be60-4daf-8f76-34bd2e3b3f12&g_st=ic&g_st=ic",
   "mapGroom": "https://www.google.com/maps?q=20.9015981,105.6981412&entry=gps&shh=CAE&lucs=,94297699,94231188,100821559,47071704,94218641,100808654,100849091,100838877,121816461,100798797,100848087&g_ep=CAISEjI2LjQ2LjEuMDE2OTc2MTQxMBgAINeCAypqLDk0Mjk3Njk5LDk0MjMxMTg4LDEwMDgyMTU1OSw0NzA3MTcwNCw5NDIxODY0MSwxMDA4MDg2NTQsMTAwODQ5MDkxLDEwMDgzODg3NywxMjE4MTY0NjEsMTAwNzk4Nzk3LDEwMDg0ODA4N0ICVk4%3D&skid=861569e6-6c77-445b-b77a-12373f8bbf1e&g_st=ic&g_st=ic",
-  "musicUrl": "./mot-doi.mp3",
-  "musicTitle": "Một Đời",
+  "musicUrl": "./3.Ta%20L%C3%A0%20C%E1%BB%A7a%20Nhau.mp3",
+  "musicTitle": "Ta Là Của Nhau",
   "story": "Tình yêu của chúng tôi không bắt đầu bằng những điều quá xa hoa, mà từ những rung động rất thật và sự đồng hành đủ lâu để nhận ra: đây chính là người mình muốn đi cùng đến cuối con đường. Từ những ngày còn là hai người xa lạ bước vào thế giới của nhau, đến khi cùng nhau vun vén từng dự định nhỏ bé, mọi trải nghiệm đều trở nên đáng giá hơn vì có nhau. Hành trình phía trước còn dài, và chúng tôi sẵn sàng bước đi cùng nhau trong niềm hạnh phúc trọn vẹn nhất.",
   "photos": [
     "https://drive.google.com/file/d/1TJ0nCiHHfHF4xKOwpldJ61FhyPIO9sRW/view?usp=drive_link",
@@ -1603,7 +1603,7 @@
 
   <script>
     (function () {
-      const STORAGE_KEY = "tv_tn_olive_envelope_v17";
+      const STORAGE_KEY = "tv_tn_olive_envelope_v18";
       const seed = JSON.parse(document.getElementById("weddingSeedData").textContent);
 
       function makePlaceholderSvg(label, bg1, bg2) {
@@ -1651,6 +1651,10 @@
         }
         if (!base.mapGroom || base.mapGroom.includes("20.9016037,105.6981811")) {
           base.mapGroom = seed.mapGroom;
+        }
+        if (base.musicUrl === "./mot-doi.mp3") {
+          base.musicUrl = seed.musicUrl;
+          base.musicTitle = seed.musicTitle;
         }
         return base;
       }
@@ -2055,19 +2059,10 @@
         const customUrl = normalizeMediaUrl(rawUrl, "audio");
         if (customUrl) {
           removeDrivePreviewPlayer();
-          if (audioEl.src !== customUrl) {
-            audioEl.src = customUrl;
-          }
-          audioEl.play().then(() => {
-            isPlaying = true;
-            musicBtn.classList.add("playing");
-            showToast(`Đang phát: ${state.musicTitle || "Một Đời"}`);
-          }).catch(() => {
-            if (rawUrl === "./mot-doi.mp3" || rawUrl === "mot-doi.mp3") {
-              showToast('Chưa thấy file mot-doi.mp3 trên GitHub — hãy upload mot-doi.mp3 cùng thư mục index.html');
-            } else {
-              showToast("Chạm lại nút loa để phát nhạc Một Đời");
-            }
+          const fallbackUrls = [customUrl];
+          if (customUrl !== "./mot-doi.mp3") fallbackUrls.push("./mot-doi.mp3");
+          tryPlayAudioCandidates(fallbackUrls, 0, () => {
+            showToast('Không phát được file nhạc — kiểm tra lại tên file .mp3 cùng thư mục index.html trên GitHub');
           });
           return;
         }
