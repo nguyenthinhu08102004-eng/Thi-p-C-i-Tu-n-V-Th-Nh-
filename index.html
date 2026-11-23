@@ -1603,7 +1603,7 @@
 
   <script>
     (function () {
-      const STORAGE_KEY = "tv_tn_olive_envelope_v18";
+      const STORAGE_KEY = "tv_tn_olive_envelope_v19";
       const seed = JSON.parse(document.getElementById("weddingSeedData").textContent);
 
       function makePlaceholderSvg(label, bg1, bg2) {
@@ -1652,7 +1652,7 @@
         if (!base.mapGroom || base.mapGroom.includes("20.9016037,105.6981811")) {
           base.mapGroom = seed.mapGroom;
         }
-        if (base.musicUrl === "./mot-doi.mp3") {
+        if (!base.musicUrl || base.musicUrl === "./mot-doi.mp3" || base.musicUrl === "mot-doi.mp3") {
           base.musicUrl = seed.musicUrl;
           base.musicTitle = seed.musicTitle;
         }
@@ -2059,10 +2059,14 @@
         const customUrl = normalizeMediaUrl(rawUrl, "audio");
         if (customUrl) {
           removeDrivePreviewPlayer();
-          const fallbackUrls = [customUrl];
-          if (customUrl !== "./mot-doi.mp3") fallbackUrls.push("./mot-doi.mp3");
-          tryPlayAudioCandidates(fallbackUrls, 0, () => {
-            showToast('Không phát được file nhạc — kiểm tra lại tên file .mp3 cùng thư mục index.html trên GitHub');
+          const candidates = [
+            customUrl,
+            "./3.Ta%20L%C3%A0%20C%E1%BB%A7a%20Nhau.mp3",
+            "./3.Ta Là Của Nhau.mp3",
+            "./mot-doi.mp3"
+          ].filter((v, i, arr) => Boolean(v) && arr.indexOf(v) === i);
+          tryPlayAudioCandidates(candidates, 0, () => {
+            showToast('Hãy kiểm tra file 3.Ta Là Của Nhau.mp3 đã nằm cùng thư mục index.html trên GitHub chưa');
           });
           return;
         }
