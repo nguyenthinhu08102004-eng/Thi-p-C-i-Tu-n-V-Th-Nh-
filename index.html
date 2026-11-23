@@ -1603,7 +1603,7 @@
 
   <script>
     (function () {
-      const STORAGE_KEY = "tv_tn_olive_envelope_v19";
+      const STORAGE_KEY = "tv_tn_olive_envelope_v20";
       const seed = JSON.parse(document.getElementById("weddingSeedData").textContent);
 
       function makePlaceholderSvg(label, bg1, bg2) {
@@ -2022,16 +2022,45 @@
           onAllFailed();
           return;
         }
-        audioEl.src = candidates[idx];
+        const candidateUrl = candidates[idx];
+        audioEl.pause();
+        audioEl.removeAttribute("src");
+        audioEl.src = candidateUrl;
         audioEl.load();
         const p = audioEl.play();
         if (p && typeof p.then === "function") {
           p.then(() => {
             isPlaying = true;
             musicBtn.classList.add("playing");
-            showToast(`Đang phát: ${state.musicTitle || "Một Đời"}`);
+            showToast(`Đang phát: ${state.musicTitle || "Ta Là Của Nhau"}`);
           }).catch(() => {
-            tryPlayAudioCandidates(candidates, idx + 1, onAllFailed);
+            // Nếu phát trực tiếp gặp trở ngại, thử tải qua fetch thành Blob rồi phát
+            if (/^(\.\/|\/|https?:)/i.test(candidateUrl) && !candidateUrl.startsWith("blob:")) {
+              fetch(candidateUrl)
+                .then((res) => {
+                  if (!res.ok) throw new Error("HTTP " + res.status);
+                  return res.blob();
+                })
+                .then((blob) => {
+                  const mp3Blob = blob.type && blob.type.includes("audio")
+                    ? blob
+                    : new Blob([blob], { type: "audio/mpeg" });
+                  const blobUrl = URL.createObjectURL(mp3Blob);
+                  audioEl.src = blobUrl;
+                  audioEl.load();
+                  return audioEl.play();
+                })
+                .then(() => {
+                  isPlaying = true;
+                  musicBtn.classList.add("playing");
+                  showToast(`Đang phát: ${state.musicTitle || "Ta Là Của Nhau"}`);
+                })
+                .catch(() => {
+                  tryPlayAudioCandidates(candidates, idx + 1, onAllFailed);
+                });
+            } else {
+              tryPlayAudioCandidates(candidates, idx + 1, onAllFailed);
+            }
           });
         } else {
           tryPlayAudioCandidates(candidates, idx + 1, onAllFailed);
@@ -2061,6 +2090,7 @@
           removeDrivePreviewPlayer();
           const candidates = [
             customUrl,
+            encodeURI("./3.Ta Là Của Nhau.mp3"),
             "./3.Ta%20L%C3%A0%20C%E1%BB%A7a%20Nhau.mp3",
             "./3.Ta Là Của Nhau.mp3",
             "./mot-doi.mp3"
